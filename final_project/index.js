@@ -3,12 +3,13 @@ const jwt = require('jsonwebtoken');
 const session = require('express-session')
 const customer_routes = require('./router/auth_users.js').authenticated;
 const genl_routes = require('./router/general.js').general;
+const regd_users = require('./router/auth_users.js').authenticated;
 
 const app = express();
 
 app.use(express.json());
 
-app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
+app.use("/customer",session({secret:"fingerprint_customer",resave: false, saveUninitialized: true}))
 
 app.use("/customer/auth/*", function auth(req,res,next){
     //check if users is logged in and has valid access token
@@ -31,6 +32,10 @@ app.use("/customer/auth/*", function auth(req,res,next){
  
 const PORT =5000;
 
+
+
+// Ensure that `/auth` is correctly prefixed
+app.use('/auth', regd_users);
 app.use("/customer", customer_routes);
 app.use("/", genl_routes);
 

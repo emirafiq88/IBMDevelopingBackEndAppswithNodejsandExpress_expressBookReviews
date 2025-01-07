@@ -47,31 +47,28 @@ regd_users.post("/login", (req, res) => {
 });
 
 // Add or update book review
-regd_users.put("/auth/review/:isbn", (req, res) => {
+regd_users.put("/review/:isbn", (req, res) => {
+    console.log(`Received request to update review for ISBN: ${req.params.isbn}`);
     const isbn = req.params.isbn;
-    const reviews = req.body.reviews; // Review text
-    const username = req.body.username; // Assuming username is sent in the body
+    const { username, review } = req.body;
 
-    if (!reviews || !username) {
+    let book = books[isbn];
+
+    if (!book) {
+        console.log("Book not found.");
+        return res.status(404).json({ message: "Book not found for this ISBN" });
+    }
+
+    if (!review || !username) {
         return res.status(400).json({ message: "Review and username are required" });
     }
 
-    let foundBook = books[isbn];
+    book.reviews[username] = review;
 
-    if (foundBook) {
-        let userReview = foundBook.reviews.find(r => r.username === username);
-
-        if (userReview) {
-            userReview.review = reviews;
-            res.json({ message: "Review updated successfully", book: foundBook });
-        } else {
-            foundBook.reviews.push({ username, review: reviews });
-            res.json({ message: "Review added successfully", book: foundBook });
-        }
-    } else {
-        return res.status(404).json({ message: "Book not found for this ISBN" });
-    }
+    console.log("Review added/updated successfully.");
+    res.json({ message: "Review added/updated successfully", book: book });
 });
+
 
 // Delete book review
 regd_users.delete("/auth/review/:isbn", (req, res) => {
